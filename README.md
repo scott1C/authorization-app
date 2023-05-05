@@ -8,3 +8,6 @@ It is an application where users can sign in and can leave some comments or ques
 
 - [@Scott](https://github.com/scott1C)
 
+## Roadmap
+
+- Connected with the RealTime Firebase Server
