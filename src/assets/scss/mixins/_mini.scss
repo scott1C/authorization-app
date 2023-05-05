@@ -1,0 +1,98 @@
+@mixin bg-cover {
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+@mixin flex {
+  display: flex;
+}
+
+@mixin flex-v-center {
+  display: flex;
+  align-items: center;
+}
+
+@mixin flex-h-center {
+  display: flex;
+  justify-content: center;
+}
+
+@mixin flex-all-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-all-sb {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin flex-in-all-center {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+$browser-context: 16; // Default
+
+@function rem($pixels, $context: $browser-context) {
+  @return #{calc($pixels/$context)}rem;
+}
+
+@mixin image-set($pathToImage) {
+  background-image: url("#{$pathToImage}.jpg");
+  background-image: image-set("#{$pathToImage}.avif" type("image/avif"),
+    "#{$pathToImage}.webp" type("image/webp"),
+    "#{$pathToImage}.jpg" type("image/jpg"));
+}
+
+@mixin footerToBottom {
+  display: grid;
+  grid-template-columns: 100%;
+  grid-template-rows: auto 1fr auto;
+  min-height: 100vh;
+}
+
+@mixin mr($value) {
+  &:not(:last-child) {
+    margin-right: #{$value}px;
+  }
+}
+
+@mixin ml($value) {
+  &:not(:last-child) {
+    margin-left: #{$value}px;
+  }
+}
+
+@mixin mb($value) {
+  &:not(:last-child) {
+    margin-bottom: #{$value}px;
+  }
+}
+
+@mixin mt($value) {
+  &:not(:last-child) {
+    margin-top: #{$value}px;
+  }
+}
+
+@mixin pseudo() {
+  content: "";
+  position: absolute;
+}
+
+@mixin hidden() {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+@mixin unhidden() {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: all;
+}
