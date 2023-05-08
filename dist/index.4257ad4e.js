@@ -559,6 +559,7 @@ function hmrAccept(bundle, id) {
 },{}],"9OMkf":[function(require,module,exports) {
 var _utils = require("./utils");
 var _question = require("./question");
+var _auth = require("./auth");
 const form = document.getElementById("form");
 const modalButton = document.getElementById("modal-btn");
 const input = document.querySelector("#question-input");
@@ -576,7 +577,6 @@ function submitFormHandler(e) {
             text: input.value.trim(),
             date: new Date().toJSON()
         };
-        // Async request to server for saving the question
         (0, _question.Question).create(question).then(()=>{
             input.value = "";
             input.className = "";
@@ -584,11 +584,27 @@ function submitFormHandler(e) {
         });
     }
 }
+function authFormHandler(e) {
+    e.preventDefault();
+    const loginButton = e.target.querySelector("button");
+    const email = e.target.querySelector("#email").value;
+    const password = e.target.querySelector("#password").value;
+    loginButton.disabled = true;
+    (0, _auth.authWithEmailAndPassword)(email, password).then((0, _question.Question).fetch).then(renderModalAfterAuth).then(()=>loginButton.disabled = false);
+}
+function renderModalAfterAuth(content) {
+    if (typeof content === "string") (0, _utils.createModal)("Error!", content) // if you log in with the incorrect password
+    ;
+    else (0, _utils.createModal)("List of the questions: ", (0, _question.Question).listToHTML(content));
+}
 function openModal() {
-    (0, _utils.createModal)("Авторизация", "<h1>test</h1>");
+    (0, _utils.createModal)("Authorization", (0, _auth.getAuthForm)());
+    document.getElementById("auth-form").addEventListener("submit", authFormHandler, {
+        once: true
+    });
 }
 
-},{"./utils":"1Si2V","./question":"80L40"}],"1Si2V":[function(require,module,exports) {
+},{"./utils":"1Si2V","./question":"80L40","./auth":"h5Xfg"}],"1Si2V":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "isValid", ()=>isValid);
@@ -660,6 +676,21 @@ class Question {
         const list = document.getElementById("list");
         list.innerHTML = html;
     }
+    static fetch(token) {
+        if (!token) return Promise.resolve('<p class="error">You do not have a token</p>') // if you log in with the incorrect password
+        ;
+        return fetch(`https://authorization-app-88153-default-rtdb.firebaseio.com/questions.json?auth=${token}`).then((response)=>response.json()).then((response)=>{
+            if (response && response.error) return `<p class="error">${response.error}</p>` // if are some errors from the server, for example, the link is incorrect
+            ;
+            return response ? Object.keys(response).map((key)=>({
+                    ...response[key],
+                    id: key
+                })) : [];
+        });
+    }
+    static listToHTML(questions) {
+        return questions.length ? `<ol>${questions.map((question)=>`<li>${question.text}</li>`).join("")}</ol>` : "<p>There are not any questions, yet</p>";
+    }
 }
 function addToLocalStorage(question) {
     const all = getQuestionsFromLocalStorage();
@@ -680,6 +711,43 @@ function toCard(question) {
         <br>
         <br>
     `;
+}
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"h5Xfg":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "getAuthForm", ()=>getAuthForm);
+parcelHelpers.export(exports, "authWithEmailAndPassword", ()=>authWithEmailAndPassword);
+function getAuthForm() {
+    return `
+        <form class="mui-form" id="auth-form">
+            <div class="mui-textfield mui-textfield--float-label">
+                <input type="email" id="email" required>
+                <label for="email">Email</label>
+            </div>
+            <div class="mui-textfield mui-textfield--float-label">
+                <input type="password" id="password" required>
+                <label for="password">Password</label>
+            </div>
+            <button type="submit" class="mui-btn mui-btn--raised mui-btn--primary">
+                Log In
+            </button>
+        </form>
+    `;
+}
+function authWithEmailAndPassword(email, password) {
+    const apiKey = "AIzaSyB7hrpvdxxDDsg86QASiTlTX3gzmudNbFo";
+    return fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`, {
+        method: "POST",
+        body: JSON.stringify({
+            email,
+            password,
+            returnSecureToken: true
+        }),
+        headers: {
+            "Content-Type": "application/json"
+        }
+    }).then((response)=>response.json()).then((data)=>data.idToken);
 }
 
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["21l9L","9OMkf"], "9OMkf", "parcelRequire565e")

@@ -1,5 +1,6 @@
 import { isValid, createModal } from "./utils"
 import { Question } from "./question"
+import { authWithEmailAndPassword, getAuthForm } from "./auth"
 
 const form = document.getElementById('form')
 const modalButton = document.getElementById('modal-btn')
@@ -21,7 +22,6 @@ function submitFormHandler(e) {
             date: new Date().toJSON()
         }
 
-        // Async request to server for saving the question
         Question.create(question).then(() => {
             input.value = ''
             input.className = ''
@@ -30,6 +30,29 @@ function submitFormHandler(e) {
     }
 }
 
+function authFormHandler(e) {
+    e.preventDefault()
+    const loginButton = e.target.querySelector('button')
+    const email = e.target.querySelector('#email').value
+    const password = e.target.querySelector('#password').value
+    loginButton.disabled = true
+    authWithEmailAndPassword(email, password)
+        .then(Question.fetch)
+        .then(renderModalAfterAuth)
+        .then(() => loginButton.disabled = false)
+}
+
+function renderModalAfterAuth(content) {
+    if (typeof content === 'string') {
+        createModal('Error!', content) // if you log in with the incorrect password
+    } else {
+        createModal('List of the questions: ', Question.listToHTML(content))
+    }
+}
+
 function openModal() {
-    createModal('Авторизация', '<h1>test</h1>')
+    createModal('Authorization', getAuthForm())
+    document
+        .getElementById('auth-form')
+        .addEventListener('submit', authFormHandler, { once: true })
 }

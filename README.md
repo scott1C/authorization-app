@@ -11,3 +11,9 @@ It is an application where users can sign in and can leave some comments or ques
 ## Roadmap
 
 - Connected with the RealTime Firebase Server
+- Authentication form was made
+- Publication of all questions which are only for admin
+
+## Demo
+
+https://authorization-app-88153.web.app/

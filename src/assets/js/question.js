@@ -23,6 +23,29 @@ export class Question {
         const list = document.getElementById('list')
         list.innerHTML = html
     }
+
+    static fetch(token) {
+        if (!token) {
+            return Promise.resolve('<p class="error">You do not have a token</p>') // if you log in with the incorrect password
+        }
+        return fetch(`https://authorization-app-88153-default-rtdb.firebaseio.com/questions.json?auth=${token}`)
+            .then(response => response.json())
+            .then(response => {
+                if (response && response.error) {
+                    return `<p class="error">${response.error}</p>` // if are some errors from the server, for example, the link is incorrect
+                }
+                return response ? Object.keys(response).map(key => ({
+                    ...response[key],
+                    id: key
+                })) : []
+            })
+    }
+
+    static listToHTML(questions) {
+        return questions.length
+            ? `<ol>${questions.map(question => `<li>${question.text}</li>`).join('')}</ol>`
+            : '<p>There are not any questions, yet</p>'
+    }
 }
 
 function addToLocalStorage(question) {
